@@ -58,47 +58,10 @@ var parseCsv = function(csvText) {
 };
 
 var printHighcharts = function(zaimData) {
-    var categoriesData = [];
-    for (var key in zaimData.amountCategories) {
-        categoriesData.push({
-            name: key,
-            y: zaimData.amountCategories[key] / zaimData.amount,
-            value: zaimData.amountCategories[key]
-        });
-    }
-    $('#highcharts-container').highcharts({
-        chart: {
-            plotBackgroundColor: null,
-            plotBorderWidth: null,
-            plotShadow: false,
-            type: 'pie'
-        },
-        title: {
-            text: 'ジャンルごとの総計'
-        },
-        tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-        },
-        plotOptions: {
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b>: {point.value} 円 ({point.percentage:.1f} %)',
-                    style: {
-                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                    }
-                }
-            }
-        },
-        series: [{
-            name: 'カテゴリ',
-            colorByPoint: true,
-            data: categoriesData
-        }]
-    });
+
 }
+
+var zaimData = null;
 
 var init = function() {
     var ID_DROP_AREA = '#csv-input-area';
@@ -142,11 +105,112 @@ var init = function() {
         if (csvText.length === 0) {
             return;
         }
-        var zaimData = parseCsv(csvText);
+        zaimData = parseCsv(csvText);
         if (zaimData !== null) {
             $(ID_DROP_AREA).hide();
             $(ID_HIGHCHARTS_AREA).show();
-            printHighcharts(zaimData);
+            pressTab(0);
         }
     });
 }();
+
+var pressTab = function(menuIndex) {
+    if (zaimData === null) {
+        return;
+    }
+    switch (menuIndex) {
+        case 0:
+            var categoriesData = [];
+            for (var key in zaimData.amountCategories) {
+                categoriesData.push({
+                    name: key,
+                    y: zaimData.amountCategories[key] / zaimData.amount,
+                    value: zaimData.amountCategories[key]
+                });
+            }
+            $('#highcharts-container').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                },
+                title: {
+                    text: 'ジャンルごとの総計'
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.value} 円 ({point.percentage:.1f} %)',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    name: 'カテゴリ',
+                    colorByPoint: true,
+                    data: categoriesData
+                }]
+            });
+        break;
+        
+        case 1:
+            var monthsData = [];
+            for (var key in zaimData.amountMonths) {
+                monthsData.push({
+                    name: key,
+                    y: zaimData.amountMonths[key],
+                    value: zaimData.amountMonths[key]
+                });
+            }
+            $('#highcharts-container').highcharts({
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: '月ごとの総計'
+                },
+                xAxis: {
+                    type: '月'
+                },
+                yAxis: {
+                    title: {
+                        text: '総計（円）'
+                    }
+
+                },
+                legend: {
+                    enabled: false
+                },
+                plotOptions: {
+                    series: {
+                        borderWidth: 0,
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.value}円'
+                        }
+                    }
+                },
+
+                tooltip: {
+                    headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                    pointFormat: '<span style="color:{point.color}">{point.name}月</span>: <b>{point.value}円</b><br/>'
+                },
+
+                series: [{
+                    name: '月',
+                    colorByPoint: true,
+                    data: monthsData
+                }]
+            });
+        break;
+    }
+}
