@@ -1,4 +1,4 @@
-var csv2json = function(csvText) {
+var parseCsv = function(csvText) {
     var csvArray = csvText.split('\n');
     var i = 0;
     var labels = csvArray[i++].split(',');
@@ -27,17 +27,83 @@ var csv2json = function(csvText) {
     var LABEL_AGGREGATE = labelIndex++;
     
     var amountCategories = [];
+    var amountMonths = [];
     for (i = 0; i < data.length; ++i) {
+        var spending = parseInt(data[i][LABEL_SPENDING], 10);
+        spending = isNaN(spending) ? 0 : spending;
+        // ジャンルごとの集計
         if (typeof amountCategories[data[i][LABEL_CATEGORY]] === 'undefined') {
-            amountCategories[data[i][LABEL_CATEGORY]] = parseInt(data[i][LABEL_SPENDING], 10);
+            amountCategories[data[i][LABEL_CATEGORY]] = 0;
         }
-        console.log();
+        amountCategories[data[i][LABEL_CATEGORY]] += spending;
+        // 月ごとの集計
+        var date = data[i][LABEL_DATE].split('-');
+        if (date.length === 3) {
+            var month = parseInt(date[1], 10);
+            if (typeof amountMonths[month] === 'undefined') {
+                amountMonths[month] = 0;
+            }
+            amountMonths[month] += spending;
+        }
     }
+    var amountAll = 0;
+    for (var key in amountCategories) {
+        amountAll += amountCategories[key];
+    }
+    return {
+        amount: amountAll,
+        amountCategories: amountCategories,
+        amountMonths: amountMonths
+    };
 };
+
+var printHighcharts = function(zaimData) {
+    var categoriesData = [];
+    for (var key in zaimData.amountCategories) {
+        categoriesData.push({
+            name: key,
+            y: zaimData.amountCategories[key] / zaimData.amount,
+            value: zaimData.amountCategories[key]
+        });
+    }
+    $('#highcharts-container').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false,
+            type: 'pie'
+        },
+        title: {
+            text: 'ジャンルごとの総計'
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.value} 円 ({point.percentage:.1f} %)',
+                    style: {
+                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                    }
+                }
+            }
+        },
+        series: [{
+            name: 'カテゴリ',
+            colorByPoint: true,
+            data: categoriesData
+        }]
+    });
+}
 
 var init = function() {
     var ID_DROP_AREA = '#csv-input-area';
     var ID_TEXT_AREA = '#csv-text';
+    var ID_HIGHCHARTS_AREA = '#highcharts-area';
     var ID_ERROR_CSV = '#error-csv';
     var ID_CLEAR_CSV_BUTTON = '#clear-csv-button';
     var ID_CONVERT_CSV_BUTTON = '#convert-csv-button';
@@ -76,59 +142,11 @@ var init = function() {
         if (csvText.length === 0) {
             return;
         }
-        csv2json(csvText);
-    });
-    
-    $('#highcharts-container').highcharts({
-        chart: {
-            plotBackgroundColor: null,
-            plotBorderWidth: null,
-            plotShadow: false,
-            type: 'pie'
-        },
-        title: {
-            text: 'ジャンルごとの総計'
-        },
-        tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-        },
-        plotOptions: {
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                    style: {
-                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                    }
-                }
-            }
-        },
-        series: [{
-            name: 'Brands',
-            colorByPoint: true,
-            data: [{
-                name: 'Microsoft Internet Explorer',
-                y: 56.33
-            }, {
-                name: 'Chrome',
-                y: 24.03,
-                sliced: true,
-                selected: true
-            }, {
-                name: 'Firefox',
-                y: 10.38
-            }, {
-                name: 'Safari',
-                y: 4.77
-            }, {
-                name: 'Opera',
-                y: 0.91
-            }, {
-                name: 'Proprietary or Undetectable',
-                y: 0.2
-            }]
-        }]
+        var zaimData = parseCsv(csvText);
+        if (zaimData !== null) {
+            $(ID_DROP_AREA).hide();
+            $(ID_HIGHCHARTS_AREA).show();
+            printHighcharts(zaimData);
+        }
     });
 }();
