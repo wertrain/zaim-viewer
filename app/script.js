@@ -164,11 +164,18 @@ var pressTab = function(menuIndex) {
         
         case 1:
             var monthsData = [];
+            var monthsDrilldown = [];
             for (var key in zaimData.amountMonths) {
                 monthsData.push({
-                    name: key,
+                    name: key + '月',
                     y: zaimData.amountMonths[key],
-                    value: zaimData.amountMonths[key]
+                    value: zaimData.amountMonths[key],
+                    percentage: (zaimData.amountMonths[key] / zaimData.amount) * 100.0,
+                    drilldown: key + '月'
+                });
+                monthsDrilldown.push({
+                    name: key + '月',
+                    id: key + '月'
                 });
             }
             $('#highcharts-container').highcharts({
@@ -195,21 +202,51 @@ var pressTab = function(menuIndex) {
                         borderWidth: 0,
                         dataLabels: {
                             enabled: true,
-                            format: '{point.value}円'
+                            format: '{point.value}円<br/>({point.percentage:.1f} %)'
                         }
                     }
                 },
 
                 tooltip: {
                     headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-                    pointFormat: '<span style="color:{point.color}">{point.name}月</span>: <b>{point.value}円</b><br/>'
+                    pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.value}円</b> ({point.percentage:.1f} %)<br/>'
                 },
 
                 series: [{
-                    name: '月',
+                    name: '月総計',
                     colorByPoint: true,
                     data: monthsData
-                }]
+                }],
+                
+                drilldown: {
+                  series: monthsDrilldown,
+                  data: [
+                      [
+                          'v11.0',
+                          24.13
+                      ],
+                      [
+                          'v8.0',
+                          17.2
+                      ],
+                      [
+                          'v9.0',
+                          8.11
+                      ],
+                      [
+                          'v10.0',
+                          5.33
+                      ],
+                      [
+                          'v6.0',
+                          1.06
+                      ],
+                      [
+                          'v7.0',
+                          0.5
+                      ]
+                  ]
+                }
             });
         break;
     }
