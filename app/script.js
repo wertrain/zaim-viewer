@@ -164,7 +164,6 @@ var pressTab = function(menuIndex) {
         
         case 1:
             var monthsData = [];
-            var monthsDrilldown = [];
             for (var key in zaimData.amountMonths) {
                 monthsData.push({
                     name: key + '月',
@@ -173,11 +172,6 @@ var pressTab = function(menuIndex) {
                     amount: zaimData.amountMonths[key],
                     percentage: (zaimData.amountMonths[key] / zaimData.amount) * 100.0,
                     drilldown: key + '月'
-                });
-                console.log(key + '月');
-                monthsDrilldown.push({
-                    name: key + '月',
-                    id: key + '月'
                 });
             }
             $('#highcharts-container').highcharts({
