@@ -170,8 +170,7 @@ var pressTab = function(menuIndex) {
                     id: key + '月',
                     y: zaimData.amountMonths[key],
                     amount: zaimData.amountMonths[key],
-                    percentage: (zaimData.amountMonths[key] / zaimData.amount) * 100.0,
-                    drilldown: key + '月'
+                    percentage: (zaimData.amountMonths[key] / zaimData.amount) * 100.0
                 });
             }
             $('#highcharts-container').highcharts({
@@ -213,6 +212,10 @@ var pressTab = function(menuIndex) {
                     data: monthsData
                 }]
             });
+        break;
+        
+        case 2:
+        
         break;
     }
 }
