@@ -28,14 +28,10 @@ var parseCsv = function(csvText) {
     
     var amountCategories = [];
     var amountMonths = [];
+    var amountMonthCategories = [];
     for (i = 0; i < data.length; ++i) {
         var spending = parseInt(data[i][LABEL_SPENDING], 10);
         spending = isNaN(spending) ? 0 : spending;
-        // ジャンルごとの集計
-        if (typeof amountCategories[data[i][LABEL_CATEGORY]] === 'undefined') {
-            amountCategories[data[i][LABEL_CATEGORY]] = 0;
-        }
-        amountCategories[data[i][LABEL_CATEGORY]] += spending;
         // 月ごとの集計
         var date = data[i][LABEL_DATE].split('-');
         if (date.length === 3) {
@@ -44,8 +40,27 @@ var parseCsv = function(csvText) {
                 amountMonths[month] = 0;
             }
             amountMonths[month] += spending;
+            
+            // 月＋ジャンルごとの集計
+            if (typeof amountMonthCategories[month] === 'undefined') {
+                amountMonthCategories[month] = [];
+            }
+            if (typeof amountMonthCategories[month][data[i][LABEL_CATEGORY]] === 'undefined') {
+                amountMonthCategories[month][data[i][LABEL_CATEGORY]] = 0;
+            }
+            amountMonthCategories[month][data[i][LABEL_CATEGORY]] += spending;
         }
+        // ジャンルごとの集計
+        if (typeof amountCategories[data[i][LABEL_CATEGORY]] === 'undefined') {
+            amountCategories[data[i][LABEL_CATEGORY]] = 0;
+        }
+        amountCategories[data[i][LABEL_CATEGORY]] += spending;
     }
+    // for (var month in amountMonthCategories) {
+        // for (var categories in amountMonthCategories[month]) {
+            // console.log(month + '月' + ' ' + categories + ' ' + amountMonthCategories[month][categories]);
+        // }
+    // }
     var amountAll = 0;
     for (var key in amountCategories) {
         amountAll += amountCategories[key];
@@ -53,7 +68,8 @@ var parseCsv = function(csvText) {
     return {
         amount: amountAll,
         amountCategories: amountCategories,
-        amountMonths: amountMonths
+        amountMonths: amountMonths,
+        amountMonthCategories: amountMonthCategories
     };
 };
 
