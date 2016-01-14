@@ -56,11 +56,11 @@ var parseCsv = function(csvText) {
         }
         amountCategories[data[i][LABEL_CATEGORY]] += spending;
     }
-    // for (var month in amountMonthCategories) {
-        // for (var categories in amountMonthCategories[month]) {
-            // console.log(month + '月' + ' ' + categories + ' ' + amountMonthCategories[month][categories]);
-        // }
-    // }
+    //for (var month in amountMonthCategories) {
+    //    for (var categories in amountMonthCategories[month]) {
+    //        console.log(month + '月' + ' ' + categories + ' ' + amountMonthCategories[month][categories]);
+    //    }
+    //}
     var amountAll = 0;
     for (var key in amountCategories) {
         amountAll += amountCategories[key];
@@ -231,7 +231,81 @@ var pressTab = function(menuIndex) {
         break;
         
         case 2:
-        
+            var monthsData = [];
+            var seriesData = [];
+            for (var month in zaimData.amountMonthCategories) {
+                monthsData.push(month + '月');
+                var data = [];
+                var dataCategory = null;
+                for (var category in zaimData.amountMonthCategories[month]) {
+                    console.log(category);
+                    data = [];
+                    dataCategory = category;
+                    for (var m in zaimData.amountMonthCategories) {
+                        var amount = (typeof zaimData.amountMonthCategories[m][category] === 'undefined') ? 0 : zaimData.amountMonthCategories[m][category];
+                        data.push(amount);
+                    }
+                }
+                
+                seriesData.push({
+                    name: dataCategory,
+                    data: data
+                });
+                console.log(dataCategory);
+            }
+            
+            $('#highcharts-container').highcharts({
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: '月ごとの総計内訳'
+                },
+                xAxis: {
+                    categories: monthsData
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: '金額（円）'
+                    },
+                    stackLabels: {
+                        enabled: true,
+                        style: {
+                            fontWeight: 'bold',
+                            color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+                        }
+                    }
+                },
+                legend: {
+                    align: 'right',
+                    x: -30,
+                    verticalAlign: 'top',
+                    y: 25,
+                    floating: true,
+                    backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+                    borderColor: '#CCC',
+                    borderWidth: 1,
+                    shadow: false
+                },
+                tooltip: {
+                    headerFormat: '<b>{point.x}</b><br/>',
+                    pointFormat: '{series.name}: {point.y}<br/>総額: {point.stackTotal}'
+                },
+                plotOptions: {
+                    column: {
+                        stacking: 'normal',
+                        dataLabels: {
+                            enabled: true,
+                            color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                            style: {
+                                textShadow: '0 0 3px black'
+                            }
+                        }
+                    }
+                },
+                series: seriesData
+            });
         break;
     }
 }
