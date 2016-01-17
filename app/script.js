@@ -50,14 +50,6 @@ var parseCsv = function(csvText) {
                 amountMonthCategories[data[i][LABEL_CATEGORY]][month] = 0;
             }
             amountMonthCategories[data[i][LABEL_CATEGORY]][month] += spending;
-            // 月＋ジャンルごとの集計
-            /*if (typeof amountMonthCategories[month] === 'undefined') {
-                amountMonthCategories[month] = [];
-            }
-            if (typeof amountMonthCategories[month][data[i][LABEL_CATEGORY]] === 'undefined') {
-                amountMonthCategories[month][data[i][LABEL_CATEGORY]] = 0;
-            }
-            amountMonthCategories[month][data[i][LABEL_CATEGORY]] += spending;*/
         }
         // ジャンルごとの集計
         if (typeof amountCategories[data[i][LABEL_CATEGORY]] === 'undefined') {
@@ -264,7 +256,6 @@ var pressTab = function(menuIndex) {
                     name: category,
                     data: data
                 });
-                console.log(data);
             }
             for (i = 0; i < 12; ++i) {
                 monthsData.push((i + 1) + '月');
