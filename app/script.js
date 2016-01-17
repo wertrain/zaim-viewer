@@ -35,7 +35,8 @@ var parseCsv = function(csvText) {
         // 月ごとの集計
         var date = data[i][LABEL_DATE].split('-');
         if (date.length === 3) {
-            var month = parseInt(date[1], 10);
+            // 0 origin に変更
+            var month = parseInt(date[1], 10) - 1;
             if (typeof amountMonths[month] === 'undefined') {
                 amountMonths[month] = 0;
             }
@@ -64,10 +65,10 @@ var parseCsv = function(csvText) {
         }
         amountCategories[data[i][LABEL_CATEGORY]] += spending;
     }
-    //for (var month in amountMonthCategories) {
-    //    for (var categories in amountMonthCategories[month]) {
-    //        console.log(month + '月' + ' ' + categories + ' ' + amountMonthCategories[month][categories]);
-    //    }
+    //for (var category in amountMonthCategories) {
+    //   for (var month in amountMonthCategories[category]) {
+    //       console.log(month + '月' + ' ' + category + ' ' + amountMonthCategories[category][month]);
+    //   }
     //}
     var amountAll = 0;
     for (var key in amountCategories) {
@@ -190,8 +191,8 @@ var pressTab = function(menuIndex) {
             var monthsData = [];
             for (var key in zaimData.amountMonths) {
                 monthsData.push({
-                    name: key + '月',
-                    id: key + '月',
+                    name: (parseInt(key, 10) + 1)  + '月',
+                    id: (parseInt(key, 10) + 1)  + '月',
                     y: zaimData.amountMonths[key],
                     amount: zaimData.amountMonths[key],
                     percentage: (zaimData.amountMonths[key] / zaimData.amount) * 100.0
@@ -241,40 +242,33 @@ var pressTab = function(menuIndex) {
         case 2:
             var monthsData = [];
             var seriesData = [];
-            /*for (var month in zaimData.amountMonthCategories) {
-                monthsData.push(month + '月');
-                var amountData = [];
-                for (var category in zaimData.amountMonthCategories[month]) {
-                    amountData[category][]
-                    var data = [];
-                    for (var m in zaimData.amountMonthCategories) {
-                        var amount = (typeof zaimData.amountMonthCategories[m][category] === 'undefined') ? 0 : zaimData.amountMonthCategories[m][category];
-                        data.push(amount);
-                    }
-                    seriesData.push({
-                        name: category,
-                        data: data
-                    });
-                }
-            }*/
+            
             var allCategories = [];
             for (var category in zaimData.amountMonthCategories) {
                 if (-1 === allCategories.indexOf(category)) {
                     allCategories.push(category);
                 }
             }
-            for (var category in allCategories) {
+            for (var i in allCategories) {
+                var category = allCategories[i];
+
                 var data = [];
-                for (var month in zaimData.amountMonthCategories[category]) {
-                    console.log(month);
+                for (var j = 0; j < zaimData.amountMonthCategories[category].length; ++j) {
+                    if (typeof zaimData.amountMonthCategories[category][j] === 'undefined') {
+                        data.push(0);
+                    } else {
+                        data.push(zaimData.amountMonthCategories[category][j]);
+                    }
                 }
-                
                 seriesData.push({
                     name: category,
                     data: data
                 });
+                console.log(data);
             }
-            console.log(allCategories);
+            for (i = 0; i < 12; ++i) {
+                monthsData.push((i + 1) + '月');
+            }
             $('#highcharts-container').highcharts({
                 chart: {
                     type: 'column'
