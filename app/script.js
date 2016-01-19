@@ -74,10 +74,6 @@ var parseCsv = function(csvText) {
     };
 };
 
-var printHighcharts = function(zaimData) {
-
-}
-
 var zaimData = null;
 
 var init = function() {
